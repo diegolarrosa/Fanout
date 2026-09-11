@@ -6,9 +6,9 @@ ripple counters, is built from nothing but those gates wired together.
 
 [![CI](https://github.com/diegolarrosa/Fanout/actions/workflows/ci.yml/badge.svg)](https://github.com/diegolarrosa/Fanout/actions/workflows/ci.yml)
 [![NuGet](https://img.shields.io/nuget/v/Fanout.svg)](https://www.nuget.org/packages/Fanout)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/diegolarrosa/Fanout/blob/main/LICENSE)
 
-*Documentación en castellano: [`es/README.md`](es/README.md).*
+*Documentación en castellano: [`es/README.md`](https://github.com/diegolarrosa/Fanout/blob/main/es/README.md).*
 
 ## What it is
 
@@ -99,10 +99,10 @@ kept as the worked example of extending `Gate` directly.
 
 ## Documentation
 
-- [Getting started](docs/getting-started.md) — ports, driving inputs, reading results
-- [How it works](docs/architecture.md) — the propagation loop, controlling values, why it terminates
-- [Component reference](docs/components.md) — every block, its signals, and its quirks
-- [Scale and memory](docs/scaling.md) — what this design costs per gate, and where the ceiling is
+- [Getting started](https://github.com/diegolarrosa/Fanout/blob/main/docs/getting-started.md) — ports, driving inputs, reading results
+- [How it works](https://github.com/diegolarrosa/Fanout/blob/main/docs/architecture.md) — the propagation loop, controlling values, why it terminates
+- [Component reference](https://github.com/diegolarrosa/Fanout/blob/main/docs/components.md) — every block, its signals, and its quirks
+- [Scale and memory](https://github.com/diegolarrosa/Fanout/blob/main/docs/scaling.md) — what this design costs per gate, and where the ceiling is
 
 ## What it is good for, and what it is not
 
@@ -114,17 +114,17 @@ It is not a production EDA tool. It has no timing model, so a real circuit's haz
 are invisible here — `Run` reports the settled result and nothing else. It has no multi-driver
 resolution, no high-impedance state, and no netlist import. And it holds every gate as a graph of
 .NET objects, which puts a practical ceiling on circuit size well below what a packed
-representation would reach. [docs/scaling.md](docs/scaling.md) works that number out honestly
+representation would reach. [docs/scaling.md](https://github.com/diegolarrosa/Fanout/blob/main/docs/scaling.md) works that number out honestly
 rather than leaving it implied.
 
 ## Provenance
 
 The original was written in 2005 against .NET 2.0 and Visual Studio 2005, and sat unpublished for
 twenty years. This release ports it to .NET 8, translates it to English, replaces the non-generic
-collections, fixes the defects listed in [CHANGELOG.md](CHANGELOG.md), and adds the test suite it
+collections, fixes the defects listed in [CHANGELOG.md](https://github.com/diegolarrosa/Fanout/blob/main/CHANGELOG.md), and adds the test suite it
 never had. The propagation design — three states, controlling-value evaluation, the double-buffered
 work queue — is unchanged, because it was right the first time.
 
 ## Licence
 
-MIT. See [LICENSE](LICENSE).
+MIT. See [LICENSE](https://github.com/diegolarrosa/Fanout/blob/main/LICENSE).
