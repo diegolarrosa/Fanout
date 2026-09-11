@@ -1,0 +1,21 @@
+* text=auto eol=lf
+
+*.cs        text eol=lf diff=csharp
+*.csproj    text eol=lf
+*.props     text eol=lf
+*.targets   text eol=lf
+*.sln       text eol=crlf
+*.md        text eol=lf
+*.yml       text eol=lf
+*.json      text eol=lf
+*.editorconfig text eol=lf
+*.gitattributes text eol=lf
+*.gitignore text eol=lf
+LICENSE     text eol=lf
+
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.snk binary
+*.nupkg binary

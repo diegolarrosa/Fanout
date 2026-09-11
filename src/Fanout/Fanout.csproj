@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Fanout</PackageId>
+    <Version>0.1.0</Version>
+    <AssemblyName>Fanout</AssemblyName>
+    <RootNamespace>Fanout</RootNamespace>
+    <Description>A gate-level digital logic simulator for .NET: eight primitive gates, three-valued logic, event-driven propagation, and a library of combinational and sequential blocks built from nothing else.</Description>
+    <PackageTags>digital-logic;logic-simulator;simulation;gates;circuit;electronics;education;netlist;flip-flop;hdl</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <None Include="../../LICENSE" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+</Project>
