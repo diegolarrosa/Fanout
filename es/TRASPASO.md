@@ -24,7 +24,7 @@ queda abierto y qué está y qué no está verificado.
 | Documentación en inglés (`README.md`, `docs/`) | ✅ **Hecha** |
 | Documentación en castellano (`es/`) | ✅ **Hecha** |
 | `LICENSE` MIT, `.gitignore`, `.editorconfig`, workflow de CI | ✅ **Hecho** |
-| **Que `dotnet build` y `dotnet test` efectivamente corran** | ✅ **Compila y el demo corre.** Falta el reporte de `dotnet test` |
+| **Que `dotnet build` y `dotnet test` efectivamente corran** | ✅ **Verificado.** Compila limpio en .NET 8.0.25; **74 de 74 pruebas pasan**; el demo corre correctamente |
 | Conteo de rondas presentado como métrica de profundidad | ✅ **Corregido.** Depende del orden y no es profundidad lógica; documentación, demo y test arreglados |
 | Modo de evaluación sincrónica (ciclo delta), para que las rondas *sí* signifiquen profundidad | ⬜ **Idea abierta**, ~40 líneas, deliberadamente sin hacer |
 | Confirmar que el ID `Fanout` está libre en nuget.org | ✅ **Libre y confirmado.** `packageid:fanout` no devuelve nada; los 17 resultados de búsqueda son paquetes de mensajería que solo mencionan fan-out |
@@ -32,29 +32,32 @@ queda abierto y qué está y qué no está verificado.
 | Un tutorial "armá tu propio procesador" | ⬜ **Idea**, sin empezar |
 | Importación/exportación de netlists | ⬜ **Idea**, sin empezar |
 
-## Lo único que no está verificado
+## Cómo se verificó
 
-**Nada de esto se compiló.** El port se escribió sin un SDK de .NET disponible, así que es probable
-que el primer `dotnet build` saque a la luz un puñado de errores comunes — un `using` que falta,
-una sobrecarga que resuelve distinto de lo pensado, un nombre de señal mal escrito. Nada de eso es
-estructural; conviene presupuestar una hora.
+El port se escribió sin un SDK de .NET disponible, así que primero se revisó de forma estática y
+después se comprobó en una máquina real. El resultado:
 
 ```bash
 dotnet restore
-dotnet build -c Release
-dotnet test -c Release
+dotnet build -c Release      # limpio, advertencias como errores, sin faltantes de doc XML
+dotnet test -c Release       # 74 pasan, 0 fallan, 0 omitidas
 dotnet run --project samples/Fanout.Demo
 ```
 
-### Dónde mirar primero si algo falla
+De todo el port salió exactamente un error de compilación: `CS0419`, un `cref` ambiguo apuntando a
+`Circuit.AddInput`, que tiene dos sobrecargas. Los comentarios de documentación que nombran un
+miembro sobrecargado necesitan la firma — `<see cref="Circuit.AddInput(Port)"/>`. Si más adelante
+se agrega una sobrecarga nueva, conviene revisar los comentarios que la mencionen.
+
+El demo destapó un defecto de fondo que las pruebas no habían visto: el conteo de rondas se estaba
+presentando como una medida de profundidad lógica, y no lo es. Ver
+[arquitectura.md](arquitectura.md#las-rondas-no-son-profundidad); la afirmación quedó corregida en
+el código, la documentación, el demo y la suite de pruebas.
+
+### Dónde mirar primero si algo se rompe más adelante
 
 En orden aproximado de probabilidad:
 
-0. **`cref` ambiguo sobre un miembro sobrecargado.** Un comentario de documentación que apunta a
-   un método con más de una sobrecarga —`<see cref="Circuit.AddInput"/>`— es `CS0419`, y como la
-   librería compila con las advertencias como errores, frena la compilación. Se arregla nombrando
-   la firma: `<see cref="Circuit.AddInput(Port)"/>`. Se encontró y corrigió un caso; si más
-   adelante se agrega una sobrecarga nueva, conviene revisar los comentarios que la mencionen.
 1. **Resolución de sobrecargas de `ConnectTo`.** Hay varias sobrecargas repartidas entre `Gate`,
    `Port` y `Module`, distinguidas por si el destino es una compuerta, un módulo, un índice o un
    nombre. Una llamada que se enganche con la equivocada probablemente compile igual y después se
@@ -63,12 +66,7 @@ En orden aproximado de probabilidad:
    el constructor de un módulo define los índices de puerto, y `ModuleLayout` tiene que coincidir.
    Una discrepancia es muda en tiempo de compilación. Las pruebas que lo cazan son la del sumador
    exhaustivo y la del multiplexor.
-3. **Las pruebas secuenciales.** Son las que dependen de comportamiento sutil de propagación y no
-   de aritmética. `Ripple_counter_counts_up_through_a_full_cycle` es la prueba más exigente de toda
-   la suite: ejercita una cadena de flip-flops maestro-esclavo donde cada etapa relojea a la
-   siguiente. El análisis dice que el planificador por rondas en anchura la hace libre de carrera,
-   pero eso es un argumento, no una medición.
-4. **Comentarios de documentación y `TreatWarningsAsErrors`.** La librería compila con las
+3. **Comentarios de documentación y `TreatWarningsAsErrors`.** La librería compila con las
    advertencias como errores y con `GenerateDocumentationFile`, así que un miembro público sin
    comentario XML rompe la compilación. Cada caso se arregla con una línea.
 

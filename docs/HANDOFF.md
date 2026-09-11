@@ -24,7 +24,7 @@ closed, what is open, and what has and has not been verified.
 | English docs (`README.md`, `docs/`) | ✅ **Done** |
 | Spanish docs (`es/`) | ✅ **Done** |
 | MIT `LICENSE`, `.gitignore`, `.editorconfig`, CI workflow | ✅ **Done** |
-| **`dotnet build` and `dotnet test` actually run** | ✅ **Builds and the sample runs.** `dotnet test` not yet reported |
+| **`dotnet build` and `dotnet test` actually run** | ✅ **Verified.** Builds clean on .NET 8.0.25; **74 of 74 tests pass**; the sample runs correctly |
 | Round counts presented as a depth metric | ✅ **Corrected.** They are order-dependent and are not logic depth; docs, sample and test fixed |
 | Synchronous (delta-cycle) evaluation mode, so rounds *would* mean depth | ⬜ **Open idea**, ~40 lines, deliberately not built yet |
 | Package name `Fanout` confirmed free on nuget.org | ✅ **Free and kept.** `packageid:fanout` returns nothing; the 17 search hits are messaging packages that merely mention fan-out |
@@ -32,29 +32,32 @@ closed, what is open, and what has and has not been verified.
 | A worked "build your own CPU" tutorial | ⬜ **Idea**, not started |
 | Netlist import/export | ⬜ **Idea**, not started |
 
-## The one thing that is not verified
+## How this was verified
 
-**Nothing here has been compiled.** The port was written without a .NET SDK available, so the
-first `dotnet build` is likely to surface a handful of ordinary mistakes — a missing `using`, an
-overload that resolves differently than intended, a typo in a signal name. None of that is
-structural; budget an hour.
+The port was written without a .NET SDK available, so it was reviewed statically and then checked
+on a real machine. The result:
 
 ```bash
 dotnet restore
-dotnet build -c Release
-dotnet test -c Release
+dotnet build -c Release      # clean, warnings as errors, no XML-doc gaps
+dotnet test -c Release       # 74 passed, 0 failed, 0 skipped
 dotnet run --project samples/Fanout.Demo
 ```
 
-### Where to look first if something fails
+Exactly one compile error came out of the whole port: `CS0419`, an ambiguous `cref` pointing at
+`Circuit.AddInput`, which has two overloads. Documentation comments that name an overloaded member
+need the signature — `<see cref="Circuit.AddInput(Port)"/>`. If a new overload is added later,
+check the doc comments that mention it.
+
+The sample surfaced one substantive defect that the tests had not: round counts were being
+presented as a measure of logic depth, and they are not. See
+[architecture.md](architecture.md#rounds-are-not-depth); the claim has been corrected in the code,
+the docs, the sample and the test suite.
+
+### Where to look first if something breaks later
 
 In rough order of likelihood:
 
-0. **Ambiguous `cref` on an overloaded member.** A documentation comment that points at a method
-   with more than one overload — `<see cref="Circuit.AddInput"/>` — is `CS0419`, and because the
-   library builds with warnings as errors it stops the build. The fix is to name the signature:
-   `<see cref="Circuit.AddInput(Port)"/>`. One instance of this was found and fixed; if a new
-   overload is added later, check the doc comments that mention it.
 1. **Overload resolution on `ConnectTo`.** There are several overloads across `Gate`, `Port` and
    `Module`, distinguished by whether the target is a gate, a module, an index or a name. A call
    that binds to the wrong one will usually still compile and then misbehave, so a failing
@@ -62,12 +65,7 @@ In rough order of likelihood:
 2. **Port order versus layout.** The order of `AddInput` and `AddOutput` calls in a module's
    constructor defines the port indices, and `ModuleLayout` has to agree. A mismatch is silent at
    compile time. The exhaustive adder test and the multiplexer test are the ones that catch it.
-3. **The sequential tests.** These are the ones that depend on subtle propagation behaviour rather
-   than on arithmetic. `Ripple_counter_counts_up_through_a_full_cycle` is the single most
-   demanding test in the suite: it exercises a chain of master-slave flip-flops where each stage
-   clocks the next. The analysis says the breadth-first round scheduler makes it race-free, but
-   that is an argument, not a measurement.
-4. **Doc comments and `TreatWarningsAsErrors`.** The library builds with warnings as errors and
+3. **Doc comments and `TreatWarningsAsErrors`.** The library builds with warnings as errors and
    `GenerateDocumentationFile`, so a public member missing an XML comment is a build failure. It
    is a one-line fix each time.
 
